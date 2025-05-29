@@ -3,8 +3,8 @@ import * as Yup from 'yup';
 const phoneRegex = /^09[0-3,9]\d{8}$/;
 
 
-export const signUpValidationSchema = Yup.object().shape({
-  name: Yup.string().required('نام کاربری الزامی است'), 
+export const signInValidationSchema = Yup.object().shape({
+
   phone: Yup.string()
     .required('شماره موبایل الزامی است')
     .matches(phoneRegex, 'شماره موبایل معتبر نیست'),
