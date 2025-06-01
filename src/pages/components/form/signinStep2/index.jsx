@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Form, Formik } from 'formik';
 import { verifyPhone } from '../validation/verifyPhone';
 import FormHeader from '../FormHeader';
@@ -6,13 +6,30 @@ import FormInput from '../FormInput';
 import SubmitButton from '../SubmitButton';
 import { callApi } from '../../../../app/helper/callApi';
 import { useCookies } from 'react-cookie';
+import { useAppSelector } from '../../../../app/hooks';
+import { selectPhoneVerifyToken } from '../../../../app/store/auth';
+import Router from 'next/router';
 
 
 
 export default function SignInForm() {
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [cookies, setCookie] = useCookies(['shop-token']);
+  // const [cookies, setCookie] = useCookies(['shop-token']);
   const [loginError, setLoginError] = useState(null);
+
+  const dispatch = useAppDispatch()
+  const setPhoneVerifyToken = (token) => {
+    dispatch(updatePhoneVerifyToken(token))
+  }
+
+  const token = useAppSelector(selectPhoneVerifyToken)
+
+
+  useEffect(() => {
+    if (token === undefined) {
+      Router.push('/components/form/signin')
+    }
+  }, [token])
 
   const handleSubmit = async (values, { setSubmitting }) => {
     setIsSubmitting(true);
@@ -21,19 +38,20 @@ export default function SignInForm() {
     try {
       const res = await callApi().post('/auth/login/verify-phone', values);
       console.log(res);
+
+
+
       if (res.status === 200) {
         console.log('✅ ورود موفق');
-       
-        setCookie('shop-token', res.data.token, {
-          maxAge: 3600 * 24 * 30,
-        });
+
+        setPhoneVerifyToken(res.data.token);
 
         return;
       }
     } catch (err) {
       console.log("❌ خطا در ورود:", err);
       if (err.response?.status === 422) {
-        setLoginError("422");
+         setLoginError("کد وارد شده اشتباه است یا منقضی شده.");
       } else {
         setLoginError("خطایی در ورود رخ داد. لطفاً دوباره تلاش کنید.");
       }

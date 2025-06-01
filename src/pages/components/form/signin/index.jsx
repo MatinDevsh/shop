@@ -8,12 +8,20 @@ import { callApi } from '../../../../app/helper/callApi';
 import { useCookies } from 'react-cookie';
 import FormFooter from '../FormFooter';
 import Router from 'next/router';
+import {useAppDispatch} from "../../../../app/hooks"
+import { updatePhoneVerifyToken } from '../../../../app/store/auth';
 
 export default function SignInForm() {
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [cookies, setCookie] = useCookies(['shop-token']);
+  // const [cookies, setCookie] = useCookies(['shop-token']);
   const [loginError, setLoginError] = useState(null);
 
+
+const dispatch = useAppDispatch()
+  const setPhoneVerifyToken = (token)=>{
+    dispatch(updatePhoneVerifyToken(token))
+
+  }
   const handleSubmit = async (values, { setSubmitting }) => {
     setIsSubmitting(true);
     setLoginError(null);
@@ -25,9 +33,11 @@ export default function SignInForm() {
       if (res.status === 200) {
         console.log('✅ ورود موفق');
         await Router.push('/components/form/signinStep2');
-        setCookie('shop-token', res.data.token, {
-          maxAge: 3600 * 24 * 30,
-        });
+        setPhoneVerifyToken(res.data.token);
+
+        // setCookie('shop-token', res.data.token, {
+        //   maxAge: 3600 * 24 * 30,
+        // });
   
         return;
       }
@@ -76,7 +86,7 @@ export default function SignInForm() {
               )}
             </Form>
 
-            <FormFooter text='می‌خواهم ثبت‌نام کنم :' textlink='ثبت‌نام' href='/components/form/signup' />
+            <FormFooter text='می‌خواهم ثبت‌ نام کنم :' textlink='ثبت‌ نام' href='/components/form/signup' />
           </div>
         </div>
       )}
